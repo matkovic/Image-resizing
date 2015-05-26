@@ -1,0 +1,5 @@
+# git ignore file
+
+/x64/
+/Release/
+/Debug/
