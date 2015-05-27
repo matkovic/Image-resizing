@@ -176,7 +176,7 @@ Mat calcGradient(Mat image)
 	/// Generate grad_x and grad_y
 	Mat grad_x, grad_y, grad;
 	Mat abs_grad_x, abs_grad_y;
-
+	
 	/// Gradient X
     Scharr( grayImage, grad_x, ddepth, 1, 0, scale, delta, cv::BORDER_DEFAULT );
     convertScaleAbs( grad_x, abs_grad_x );
@@ -184,6 +184,8 @@ Mat calcGradient(Mat image)
     Scharr( grayImage, grad_y, ddepth, 0, 1, scale, delta, cv::BORDER_DEFAULT );
     convertScaleAbs( grad_y, abs_grad_y );
 	addWeighted( abs_grad_x, 0.5, abs_grad_y, 0.5, 0, grad );
+	
+
 
 	return grad;
 }
@@ -340,6 +342,7 @@ Mat removeSeam(Mat image, Mat seam)
 Mat removeCol(Mat seam, Mat rc)
 {
 	Mat rowCol;
+
 	if(seam.at<float>(seam.rows/2) ==0 )
 	{
 		rowCol=rc.colRange(1,rc.cols);
@@ -371,7 +374,7 @@ Mat calculateByOptimalSeamOrder (Mat image, int reduceRows, int reduceCols)
 	for(int i=0;i<image.cols;i++) cols.at<int>(i)=i;
 	
 	Mat imageClone = image.clone();
-	
+
 	Mat energy = calculateEnergy(imageClone);
 
 	int count=0;
@@ -419,8 +422,6 @@ Mat calculateByOptimalSeamOrder (Mat image, int reduceRows, int reduceCols)
 			Mat seamVertical=calculateSeam(energyVertical,seamEnergyVertical);
 			Mat seamHorizontal=calculateSeam(energyHorizontal,seamEnergyHorizontal);
 			
-
-
 			if(seamEnergyHorizontal<seamEnergyVertical)
 			{
 				transpose(imageClone,imageClone);
@@ -452,22 +453,10 @@ Mat calculateByOptimalSeamOrder (Mat image, int reduceRows, int reduceCols)
 			
 			count=0;
 		}
-
-		
-		
-
 	}
 
 	centerInOriginalImage=Point(cols.at<int>(cols.cols/2), rows.at<int>(rows.cols/2));
-		/*
-	circle( image,
-				centerInOriginalImage,
-				10,
-				Scalar( rng.uniform(0,255), 255, 255 ),
-				-1, //full
-				8 );
-		imshow("image",image);
-		*/
+
 
 	return imageClone;
 }
