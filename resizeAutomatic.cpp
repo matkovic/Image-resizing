@@ -5,13 +5,7 @@
 #include "resizeAM.h"
 #include <limits>
 
-#include <opencv2\features2d\features2d.hpp>
-#include <opencv2\nonfree\features2d.hpp>
-
-#include <opencv2\objdetect\objdetect.hpp>
-
 # define M_PI           3.14159265358979323846  /* pi */
-# define M_PIl          3.141592653589793238462643383279502884L /* pi */
 
 using namespace cv;
 using namespace std;
