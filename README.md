@@ -22,4 +22,13 @@ Resize.exe --input in.jpg --output out.jpg --size 300x400
 
 Idea: the algorithm consists of multiple algorithms. The main is seam carving but I use it only to bring important parts closer to center. Before I use seam carving, I calculate the gradient(25%) + "SALIENT REGION DETECTION WITH OPPONENT COLOR BOOSTING"(75%) which I put in seam carving energy calculation to calculate the seam with the lowest energy. When I am done with seam carving I calculate the center of carved image, see where that point is in the original image and crop the original image to our arbitrary size. The reason I did this is because sometimes the image after seam carving is really deformed and hard to look at it. With calculated center there is no deformation, but the main object is sometimes cut - it is not fully in the output image.
 
-Also, if you use large images (more than 1500x1500) be very patient - it may take minutes to finish.
+Also, if you use large images (more than 1500x1500) be very patient - it may take minutes to finish. (it does not work on all images)
+
+Good example:
+Input
+
+![ExampleAutomaticIn](http://shrani.si/f/1h/XJ/33SPkIue/zeman1.png)
+
+Output - size 200x400
+
+![ExampleAutomaticOut](http://shrani.si/f/2W/5M/38fEQ71u/zeman1a.jpg)
