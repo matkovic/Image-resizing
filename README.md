@@ -1,7 +1,7 @@
 # Image-resizing
 by Tilen Matkovič
 
-We want to crop images from NxM to XxY, but we don't want to remove important parts. Our assignment consists of two parts: manual (we mark the important-featured part) and automatic. Program was made with Visual Studio 2012 in C++ and OpenCV libraries (2.4.11).
+We want to crop images from NxM to XxY, but we don't want to remove important parts. Our assignment consists of two parts: manual (we mark the important-featured part) and automatic. Program was made with Visual Studio 2012 in C++ and OpenCV libraries (2.4.11). If you want to compile it, make sure you have installed OpenCV (PATH set). I used local method, OpenCV_Debug.props and OpenCV_Release.props are there if you want them and correct settings if needed. If you don't want to mess with this, everything you need is in 'program' folder. Please contact me if you have any comments.
 
 Program options:
 
