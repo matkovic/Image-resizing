@@ -443,9 +443,6 @@ Mat calculateByOptimalSeamOrder (Mat image, int reduceRows, int reduceCols)
 		{ //recalculate energy after a few seams removed
 			energy = calculateEnergy(imageClone);
 
-			imshow("en",energy);
-			waitKey(0);
-
 			if(imageClone.rows>800 && imageClone.cols>800) //take less time for bigger pictures, because energy calculation takes time
 				count=200;
 			else
