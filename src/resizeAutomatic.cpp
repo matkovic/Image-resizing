@@ -463,7 +463,7 @@ Mat seamCarving(Mat image, string output, Point size)
 	double t = (double)getTickCount();  //timer
 
 	newImage=calculateByOptimalSeamOrder(newImage,newImage.rows-size.y,newImage.cols-size.x);
-	newImage = image(Rect(centerInOriginalImage.x-size.x/2, centerInOriginalImage.y-size.y/2, size.x, size.y));
+	//newImage = image(Rect(centerInOriginalImage.x-size.x/2, centerInOriginalImage.y-size.y/2, size.x, size.y));
 
 	t = ((double)getTickCount() - t)/getTickFrequency(); 
 	std::cout << "Times passed in seconds: " << t << std::endl;
