@@ -14,6 +14,7 @@ using namespace std;
 Mat gDer(Mat f, int sigma, int iorder, int jorder)
 {
 	//translated from Matlab - use with calcSalientColor
+	//calculates gaussian derivative
 
 	int break_off_sigma=3;
 	int filtersize = (int)floor(break_off_sigma*sigma+0.5);
@@ -66,10 +67,9 @@ Mat gDer(Mat f, int sigma, int iorder, int jorder)
 	return H;
 }
 
-
 Mat calcSalientColor(Mat image)
 {
-	//calculate color saliency from article
+	//calculate color saliency from article "SALIENT REGION DETECTION WITH OPPONENT COLOR BOOSTING"
 	//return gray image with important parts
 
 	Mat OpponentMatrix = (Mat_<float>(3,3) << 0.3905, 0.5499, 0.0089, -0.1764, 0.4307, -0.1164, -0.1191, -0.1739, 0.8673);
@@ -106,7 +106,7 @@ Mat calcSalientColor(Mat image)
 			M.at<float>(i,j)=(float)sum(OiOj)[0];			
 		}
 	}
-	
+
 	M=M/(image.rows*image.cols);
 
 	Mat S,U,V;
@@ -151,7 +151,6 @@ Mat calcSalientColor(Mat image)
 	normalize(ss,ss,0,255,NORM_MINMAX, CV_8UC1);
 
 	double T = 2*sum(ss)[0] / (ss.cols*ss.rows);
-	
 	threshold( ss, ss, T, 255, CV_THRESH_BINARY );
 
 	return ss;
@@ -179,8 +178,6 @@ Mat calcGradient(Mat image)
     convertScaleAbs( grad_y, abs_grad_y );
 	addWeighted( abs_grad_x, 0.5, abs_grad_y, 0.5, 0, grad );
 	
-
-
 	return grad;
 }
 
@@ -191,6 +188,7 @@ Mat calculateEnergy(Mat image)
 	Mat energy;
 
 	Mat salientColor = calcSalientColor(image);
+
 	Mat gradient = calcGradient(image);
 	
 	addWeighted(salientColor,0.75,gradient,0.25,0,energy);
@@ -371,7 +369,7 @@ Mat calculateByOptimalSeamOrder (Mat image, int reduceRows, int reduceCols)
 
 	Mat energy = calculateEnergy(imageClone);
 
-	int count=0;
+	int count=50;
 	while(true)
 	{
 		Point prevCenter=Point(imageClone.cols/2, imageClone.rows/2);
@@ -439,18 +437,23 @@ Mat calculateByOptimalSeamOrder (Mat image, int reduceRows, int reduceCols)
 				cols=removeCol(seamVertical,cols);
 			}
 		}
-		count++;
+		count--;
 
-		if(count==50)
-		{
+		if(count==0)
+		{ //recalculate energy after a few seams removed
 			energy = calculateEnergy(imageClone);
-			
-			count=0;
+
+			imshow("en",energy);
+			waitKey(0);
+
+			if(imageClone.rows>800 && imageClone.cols>800) //take less time for bigger pictures, because energy calculation takes time
+				count=200;
+			else
+				count=50;
 		}
 	}
 
 	centerInOriginalImage=Point(cols.at<int>(cols.cols/2), rows.at<int>(rows.cols/2));
-
 
 	return imageClone;
 }
