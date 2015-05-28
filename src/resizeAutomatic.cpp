@@ -186,17 +186,14 @@ Mat calculateEnergy(Mat image)
 	//calculate energy - gray image from image
 
 	Mat energy;
-
 	Mat salientColor = calcSalientColor(image);
-
 	Mat gradient = calcGradient(image);
-	
 	addWeighted(salientColor,0.75,gradient,0.25,0,energy);
 
 	return energy;
 }
 
-Mat findSeam(Mat listOfSeams, float& seamEnergy)
+Mat findSeam(Mat listOfSeams)
 {
 	//list of seam = calculated energy of seam from calculateSeam()
 	//seamEnergy = lowest energy (1xN vector with positions of which pixel to remove)
@@ -215,7 +212,6 @@ Mat findSeam(Mat listOfSeams, float& seamEnergy)
 	seamOptimal.at<float>(listOfSeams.rows-1,0)=(float)minLoc.x;
 	
 	int j = minLoc.x;
-	seamEnergy=(float)minVal;
 
 	float* pCurrent = (float*) listOfSeams.data;;
 	size_t elem_step = listOfSeams.step / sizeof(float);
@@ -245,13 +241,11 @@ Mat findSeam(Mat listOfSeams, float& seamEnergy)
 		int inc=minLoc.x-1;
 		j=(int)seamOptimal.at<float>(row+1,0)+inc;
 		seamOptimal.at<float>(row,0)=(float)j;
-
-		seamEnergy+=(float)minVal;
 	}
 	return seamOptimal;
 }
 
-Mat calculateSeam(Mat energy, float& seamEnergy)
+Mat calculateSeam(Mat energy)
 {
 	//energy=gradient+colorSaliency
 	//calculate seam energy map from Mat energy
@@ -294,14 +288,14 @@ Mat calculateSeam(Mat energy, float& seamEnergy)
         }
     }
 
-	seam = findSeam(energyCopy,seamEnergy);
+	seam = findSeam(energyCopy);
 
 	return seam;
 }
 
 Mat removeSeam(Mat image, Mat seam)
 {
-	//remove col vector(Mat seam) - seam(0)=x-location... - from image(NxM)
+	//remove column vector(Mat seam) - seam(0)=x-location... - from image(NxM)
 	//return image without seam
 
 	Mat tempImage;
@@ -333,6 +327,8 @@ Mat removeSeam(Mat image, Mat seam)
 
 Mat removeCol(Mat seam, Mat rc)
 {
+	//check which value is in the middle of seam and
+	//remove middle value from rc
 	Mat rowCol;
 
 	if(seam.at<float>(seam.rows/2) ==0 )
@@ -354,7 +350,7 @@ Mat removeCol(Mat seam, Mat rc)
 }
 
 Point centerInOriginalImage;
-Mat calculateByOptimalSeamOrder (Mat image, int reduceRows, int reduceCols)
+Mat calculateBySeamOrder (Mat image, int reduceRows, int reduceCols)
 {
 	//reduce reduceRows rows and reduceCols columns from image
 	//reducing with seam carving
@@ -369,109 +365,105 @@ Mat calculateByOptimalSeamOrder (Mat image, int reduceRows, int reduceCols)
 
 	Mat energy = calculateEnergy(imageClone);
 
-	int count=50;
-	while(true)
+	if(reduceCols>reduceRows) //columns or rows first - which is higher
 	{
-		Point prevCenter=Point(imageClone.cols/2, imageClone.rows/2);
-
-		//if both are 0: break, no more seams to cut
-		if(reduceRows==0 && reduceCols==0) break;
-
-		if(reduceRows==0)
-		{			
-			float seamEnergyVertical=0;
-			Mat seamVertical=calculateSeam(energy,seamEnergyVertical);
-			imageClone=removeSeam(imageClone,seamVertical);
-			energy=removeSeam(energy,seamVertical);
-			reduceCols--;
-
-			cols=removeCol(seamVertical,cols);
-
-		}
-		else if(reduceCols==0)
+		for(int i=0;i<reduceCols;i++)
 		{
-			float seamEnergyHorizontal=0;
-			transpose(energy,energy);
-			Mat seamHorizontal=calculateSeam(energy,seamEnergyHorizontal);
-			transpose(imageClone,imageClone);
-			imageClone=removeSeam(imageClone,seamHorizontal);
-			energy=removeSeam(energy,seamHorizontal);
-			transpose(imageClone,imageClone);
-			transpose(energy,energy);
-
-			reduceRows--;
-
-			rows=removeCol(seamHorizontal,rows);
-		}
-		else
-		{
-			Mat energyVertical = energy;
-			Mat energyHorizontal = energy.t();
-
-			float seamEnergyVertical=0;
-			float seamEnergyHorizontal=0;
-			
-			Mat seamVertical=calculateSeam(energyVertical,seamEnergyVertical);
-			Mat seamHorizontal=calculateSeam(energyHorizontal,seamEnergyHorizontal);
-			
-			if(seamEnergyHorizontal<seamEnergyVertical)
-			{
-				transpose(imageClone,imageClone);
-				imageClone=removeSeam(imageClone,seamHorizontal);
-				transpose(imageClone,imageClone);
-
-				transpose(energy,energy);
-				energy=removeSeam(energy,seamHorizontal);
-				transpose(energy,energy);
-
-				reduceRows--;
-
-				rows=removeCol(seamHorizontal,rows);
-			}
-			else
-			{
+				Mat seamVertical=calculateSeam(energy);
 				imageClone=removeSeam(imageClone,seamVertical);
-				energy=removeSeam(energy,seamVertical);
-				reduceCols--;
+				energy=removeSeam(energy,seamVertical);	
 
 				cols=removeCol(seamVertical,cols);
-			}
+
+				if(i%20==0) {
+					energy = calculateEnergy(imageClone);
+				}
 		}
-		count--;
+		transpose(energy,energy);
+		transpose(imageClone,imageClone);
+		for(int j=0;j<reduceRows;j++)
+		{
+				Mat seamHorizontal=calculateSeam(energy);
+				imageClone=removeSeam(imageClone,seamHorizontal);
+				energy=removeSeam(energy,seamHorizontal);
 
-		if(count==0)
-		{ //recalculate energy after a few seams removed
-			energy = calculateEnergy(imageClone);
+				rows=removeCol(seamHorizontal,rows);
+				if(j%20==0) {
+					energy = calculateEnergy(imageClone);
+				}
+		}
+		transpose(imageClone,imageClone);
+		transpose(energy,energy);
+	}
+	else
+	{
+		transpose(energy,energy);
+		transpose(imageClone,imageClone);
+		for(int j=0;j<reduceRows;j++)
+		{
+				Mat seamHorizontal=calculateSeam(energy);
+				imageClone=removeSeam(imageClone,seamHorizontal);
+				energy=removeSeam(energy,seamHorizontal);
 
-			if(imageClone.rows>800 && imageClone.cols>800) //take less time for bigger pictures, because energy calculation takes time
-				count=200;
-			else
-				count=50;
+				rows=removeCol(seamHorizontal,rows);
+
+				if(j%20==0) {
+					energy = calculateEnergy(imageClone);
+				}
+		}
+		transpose(imageClone,imageClone);
+		transpose(energy,energy);
+		for(int i=0;i<reduceCols;i++)
+		{
+				Mat seamVertical=calculateSeam(energy);
+				imageClone=removeSeam(imageClone,seamVertical);
+				energy=removeSeam(energy,seamVertical);	
+				cols=removeCol(seamVertical,cols);
+
+				if(i%20==0) {
+					energy = calculateEnergy(imageClone);
+				}
 		}
 	}
 
 	centerInOriginalImage=Point(cols.at<int>(cols.cols/2), rows.at<int>(rows.cols/2));
-
+	
 	return imageClone;
 }
 
-Mat seamCarving(Mat image, string output, Point size)
+Mat cutImage(Mat image, string output, Point size)
 {
+	//prepare settings for cutting from image
+
 	Mat newImage;
 	image.copyTo(newImage);
 	
+
+	//
 	double t = (double)getTickCount();  //timer
+	//
 
-	newImage=calculateByOptimalSeamOrder(newImage,newImage.rows-size.y,newImage.cols-size.x);
-	//newImage = image(Rect(centerInOriginalImage.x-size.x/2, centerInOriginalImage.y-size.y/2, size.x, size.y));
 
+	int count=1;
+	while(newImage.cols>600 && newImage.rows>600) //resize image to smaller dimensions for faster processing
+	{
+		count++;
+		resize(newImage,newImage,Size(newImage.cols/2,newImage.rows/2));
+	}
+
+	newImage=calculateBySeamOrder(newImage,newImage.rows-size.y/count,newImage.cols-size.x/count); //remove seams
+	centerInOriginalImage=centerInOriginalImage*count;	//multiply to apply to original image
+	newImage = image(Rect(centerInOriginalImage.x-size.x/2, centerInOriginalImage.y-size.y/2, size.x, size.y)); //cut from original image
+
+
+	//
 	t = ((double)getTickCount() - t)/getTickFrequency(); 
 	std::cout << "Times passed in seconds: " << t << std::endl;
+	//
+
 
 	return newImage;
 }
-
-
 
 int resizeAutomatic( string input, string output, Point size)
 {
@@ -490,7 +482,7 @@ int resizeAutomatic( string input, string output, Point size)
 		return -1;
     }
 
-	Mat outputImage = seamCarving(image,output, size);
+	Mat outputImage = cutImage(image,output, size);
 	imwrite(output,outputImage);
 
     waitKey(0); // Wait for a keystroke in the window
