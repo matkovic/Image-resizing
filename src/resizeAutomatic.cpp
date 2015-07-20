@@ -78,6 +78,7 @@ Mat calcSalientColor(Mat image)
 	Mat channel[3];//bgr
 	split(image,channel);
 
+
 	O[0]=OpponentMatrix.at<float>(0,0)*channel[2] + OpponentMatrix.at<float>(0,1)*channel[1] + OpponentMatrix.at<float>(0,2)*channel[0];
 	O[1]=OpponentMatrix.at<float>(1,0)*channel[2] + OpponentMatrix.at<float>(1,1)*channel[1] + OpponentMatrix.at<float>(1,2)*channel[0];
 	O[2]=OpponentMatrix.at<float>(2,0)*channel[2] + OpponentMatrix.at<float>(2,1)*channel[1] + OpponentMatrix.at<float>(2,2)*channel[0];
@@ -150,6 +151,7 @@ Mat calcSalientColor(Mat image)
 
 	normalize(ss,ss,0,255,NORM_MINMAX, CV_8UC1);
 
+
 	double T = 2*sum(ss)[0] / (ss.cols*ss.rows);
 	threshold( ss, ss, T, 255, CV_THRESH_BINARY );
 
@@ -189,6 +191,10 @@ Mat calculateEnergy(Mat image)
 	Mat salientColor = calcSalientColor(image);
 	Mat gradient = calcGradient(image);
 	addWeighted(salientColor,0.75,gradient,0.25,0,energy);
+
+	//imshow("asd",gradient);
+	//imwrite("zeman1gradient.png",gradient);
+	//waitKey(0);
 
 	return energy;
 }
@@ -325,6 +331,24 @@ Mat removeSeam(Mat image, Mat seam)
 	return tempImage;	
 }
 
+Mat drawSeam(Mat image, Mat seam)
+{
+	Mat tempImage;
+
+	for(int i=0;i<seam.rows;i++)
+	{
+		float seamValue = seam.at<float>(i,0);
+		Mat row = image.row(i);
+
+		Point3_<uchar>* p = image.ptr<Point3_<uchar> >(i,seamValue);
+		p->z=255;
+		p->y=0;
+		p->x=0;
+	}
+
+	return tempImage;	
+}
+
 Mat removeCol(Mat seam, Mat rc)
 {
 	//check which value is in the middle of seam and
@@ -450,9 +474,9 @@ Mat cutImage(Mat image, string output, Point size)
 		count++;
 		resize(newImage,newImage,Size(newImage.cols/2,newImage.rows/2));
 	}
-
-	newImage=calculateBySeamOrder(newImage,newImage.rows-size.y/count,newImage.cols-size.x/count); //remove seams
-	centerInOriginalImage=centerInOriginalImage*count;	//multiply to apply to original image
+	
+	newImage=calculateBySeamOrder(newImage,newImage.rows-size.y/pow(2,count-1),newImage.cols-size.x/pow(2,count-1)); //remove seams
+	centerInOriginalImage=centerInOriginalImage*pow(2,count-1);	//multiply to apply to original image
 	newImage = image(Rect(centerInOriginalImage.x-size.x/2, centerInOriginalImage.y-size.y/2, size.x, size.y)); //cut from original image
 
 
