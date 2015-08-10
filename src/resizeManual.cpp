@@ -67,11 +67,6 @@ int resizeManual(string input,string output, Point size, Point featured1, Point 
 	newWidth = newPoint2.x-newPoint1.x;
 	newHeight = newPoint2.y-newPoint1.y;
 	outputImage = image(Rect(newPoint1.x, newPoint1.y, newWidth, newHeight));
-	
-    //namedWindow( "Display window", WINDOW_AUTOSIZE ); // Create a window for display.
-    //imshow( "Display window", image ); // Show our image inside it.
-	//imshow( "part", featuredRectangle);
-	//imshow( "New image", outputImage);
 
 	imwrite(output,outputImage);
 
