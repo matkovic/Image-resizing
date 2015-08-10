@@ -192,10 +192,6 @@ Mat calculateEnergy(Mat image)
 	Mat gradient = calcGradient(image);
 	addWeighted(salientColor,0.75,gradient,0.25,0,energy);
 
-	//imshow("asd",gradient);
-	//imwrite("zeman1gradient.png",gradient);
-	//waitKey(0);
-
 	return energy;
 }
 
@@ -478,7 +474,6 @@ Mat cutImage(Mat image, string output, Point size)
 	newImage=calculateBySeamOrder(newImage,newImage.rows-size.y/pow(2,count-1),newImage.cols-size.x/pow(2,count-1)); //remove seams
 	centerInOriginalImage=centerInOriginalImage*pow(2,count-1);	//multiply to apply to original image
 	newImage = image(Rect(centerInOriginalImage.x-size.x/2, centerInOriginalImage.y-size.y/2, size.x, size.y)); //cut from original image
-
 
 	//
 	t = ((double)getTickCount() - t)/getTickFrequency(); 
