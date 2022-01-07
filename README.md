@@ -18,13 +18,13 @@ Main idea: we calculate the center of the featured part in the image and expand 
 
 Example:
 
-Resize.exe --input 106005.jpg --output 106005n.jpg --size 250x250 --featured 120x20-360x250
+Resize.exe --input cyclist.jpg --output cyclistnmanual.jpg --size 120x170 --featured 190x30-300x180
 
-![ExampleManualIn](http://shrani.si/f/2j/ro/15EKylE/106005.jpg)
+![ExampleManualIn](imgs/cyclist.jpg)
 
-![ExampleManualOut](http://shrani.si/f/3g/Ce/4PcKB9pT/106005n.jpg)
+![ExampleManualOut](imgs/cyclistnmanual.jpg)
 
-#Automatic
+# Automatic
 We start automatic cropping with
 
 Resize.exe --input in.jpg --output out.jpg --size 300x400
@@ -35,12 +35,12 @@ Sometimes it may take 10s or more. (it does not work perfectly on all images - w
 
 Good example:
 
-Resize.exe --input zeman1.jpg --output zeman1a.jpg --size 200x400
+Resize.exe --input horse.jpg --output horsen.jpg --size 250x250
 
 Input
 
-![ExampleAutomaticIn](http://shrani.si/f/1h/XJ/33SPkIue/zeman1.png)
+![ExampleAutomaticIn](imgs/horse.jpg)
 
 Output - size 200x400
 
-![ExampleAutomaticOut](http://shrani.si/f/2W/5M/38fEQ71u/zeman1a.jpg)
+![ExampleAutomaticOut](imgs/horsen.jpg)
